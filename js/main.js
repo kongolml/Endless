@@ -6,14 +6,14 @@ for(var i=0; i<=$("section").length; i++){
 $.fn.endless = function(options) {
 
     var settings = $.extend({
-        bodyWidth: 1,
-        sectionsInARow: 1
+        sectionsInARow: 1,
+        axis: 'both'
     }, options );
 
 
     //set container width:
     this.css({
-    	width: settings.bodyWidth+"00vw",
+    	width: settings.sectionsInARow+"00vw",
     });
 
     $("section").wrapAll('<div class="endless-wrapper"></div>');
@@ -30,10 +30,13 @@ $.fn.endless = function(options) {
     var toTranslateY = 0;
 
     $("body").mousedown(function(e){
-    	startDrag = true;
-    	dragXStart = e.pageX;
-    	dragYStart = e.pageY;
-    	$(".endless-wrapper").addClass("dragging");
+    	//start dragging only with left mouse button:
+    	if(e.which === 1){
+    		startDrag = true;
+	    	dragXStart = e.pageX;
+	    	dragYStart = e.pageY;
+	    	$(".endless-wrapper").addClass("dragging");
+	    }
     });
 
     $("body").mouseup(function(e){
@@ -44,13 +47,6 @@ $.fn.endless = function(options) {
     	translatedY = matrix.m42;
     });
 
-    function drag(x, y){
-    	$(".endless-wrapper").css({
-    		"transform": "translate3d("+x+"px, "+y+"px, 0px)",
-    		"-webkit-transform": "translate3d("+x+"px, "+y+"px, 0px)"
-    	});
-    };
-
     $("body").mousemove(function(e){
     	if(startDrag) {
     		toTranslateX = e.pageX - dragXStart + translatedX;
@@ -58,6 +54,47 @@ $.fn.endless = function(options) {
     		drag(toTranslateX, toTranslateY);
     	}
     });
+
+    function drag(x, y){
+    	//check if dragging is within the container:
+    	if(x>0){
+    		x=0
+    	};
+
+    	if(y>0){
+    		y=0
+    	};
+
+    	if ( (-x)>$(".endless-wrapper").width()-$("section").width() ) {
+    		x=-($(".endless-wrapper").width()-$("section").width());
+    	};
+
+    	if ( (-y)>$(".endless-wrapper").height()-$("section").height() ) {
+    		y=-($(".endless-wrapper").height()-$("section").height());
+    	};
+
+    	switch(settings.axis){
+    		case "x":
+    		$(".endless-wrapper").css({
+    			"transform": "translate3d("+x+"px, 0px, 0px)",
+    			"-webkit-transform": "translate3d("+x+"px, 0px, 0px)"
+    		});
+    		break;
+
+    		case "y":
+    		$(".endless-wrapper").css({
+    			"transform": "translate3d(0px, "+y+"px, 0px)",
+    			"-webkit-transform": "translate3d(0px, "+y+"px, 0px)"
+    		});
+    		break;
+
+    		default:
+    		$(".endless-wrapper").css({
+    			"transform": "translate3d("+x+"px, "+y+"px, 0px)",
+    			"-webkit-transform": "translate3d("+x+"px, "+y+"px, 0px)"
+    		});
+    	}
+    };
 
 
 
@@ -67,5 +104,6 @@ $.fn.endless = function(options) {
 };
 
 $("body").endless({
-	bodyWidth: 2
+	sectionsInARow: 3,
+	axis: "x"
 });
