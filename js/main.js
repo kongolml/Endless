@@ -16,25 +16,53 @@ $.fn.endless = function(options) {
     	width: settings.bodyWidth+"00vw",
     });
 
+    $("section").wrapAll('<div class="endless-wrapper"></div>');
 
-    //dragging of the field:
+
+    //catch drag:
     var startDrag = false;
+    var dragXStart, dragYStart;
+    var translated = window.getComputedStyle($('.endless-wrapper').get(0));
+    var translatedX = 0;
+    var translatedY = 0;
 
-    $("body").mousedown(function(grabbed){
+    var toTranslateX = 0;
+    var toTranslateY = 0;
+
+    $("body").mousedown(function(e){
     	startDrag = true;
-    	var grabbedX = grabbed.pageX;
-    	var grabbedY = grabbed.pageY;
-
-    	$("body").mousemove(function(dragged){
-    		if(startDrag){
-    			console.log("dragged")
-    		}
-    	})
+    	dragXStart = e.pageX;
+    	dragYStart = e.pageY;
+    	$(".endless-wrapper").addClass("dragging");
     });
 
-    $("body").mouseup(function(grabbed){
+    $("body").mouseup(function(e){
     	startDrag = false;
+    	$(".endless-wrapper").removeClass("dragging");
+		var matrix = new WebKitCSSMatrix(translated.webkitTransform);
+    	translatedX = matrix.m41;
+    	translatedY = matrix.m42;
     });
+
+    function drag(x, y){
+    	$(".endless-wrapper").css({
+    		"transform": "translate3d("+x+"px, "+y+"px, 0px)",
+    		"-webkit-transform": "translate3d("+x+"px, "+y+"px, 0px)"
+    	});
+    };
+
+    $("body").mousemove(function(e){
+    	if(startDrag) {
+    		toTranslateX = e.pageX - dragXStart + translatedX;
+    		toTranslateY = e.pageY - dragYStart + translatedY;
+    		drag(toTranslateX, toTranslateY);
+    	}
+    });
+
+
+
+
+
 
 };
 

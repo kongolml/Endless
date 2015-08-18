@@ -2,10 +2,26 @@ body {
 	width: auto;
 	height: auto;
 	position: relative;
+	overflow: hidden;
 }
 
 section {
 	width: 100vw;
 	height: 100vh;
 	float: left;
+}
+
+.endless-wrapper:before, .endless-wrapper:after {
+	content: "";
+	display: table;
+}
+
+.endless-wrapper.dragging {
+	cursor: -moz-grabbing;
+    cursor: -webkit-grabbing;
+    cursor: grabbing;
+}
+
+.endless-wrapper {
+	position: absolute;
 }
