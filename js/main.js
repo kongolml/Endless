@@ -7,7 +7,8 @@ $.fn.endless = function(options) {
 
     var settings = $.extend({
         sectionsInARow: 1,
-        axis: 'both'
+        axis: 'both',
+        transition: 400
     }, options );
 
 
@@ -45,6 +46,14 @@ $.fn.endless = function(options) {
 		var matrix = new WebKitCSSMatrix(translated.webkitTransform);
     	translatedX = matrix.m41;
     	translatedY = matrix.m42;
+
+    	//decide if continue scrolling:
+    	if( Math.abs(dragXStart-e.pageX)/($("section").width()/100)>5 ){
+            //calculate missing distanse to scroll:
+    	} else {
+    		
+    	}
+    	
     });
 
     $("body").mousemove(function(e){
@@ -94,6 +103,23 @@ $.fn.endless = function(options) {
     			"-webkit-transform": "translate3d("+x+"px, "+y+"px, 0px)"
     		});
     	}
+
+    };
+
+
+    //TODO: get active slide:
+    function markActive(){
+        var winH = $(window).height();
+        var winW = $(window).width();
+
+        //find acctive slide x-coordinates:
+        for(var i=0; i<=$("section").length; i++){
+            if( $("section").eq(i).offset().left != 0 ) {
+                console.log("not $('section').eq("+i+")")
+            } else {
+                console.log("its $('section').eq("+i+")")
+            }
+        }
     };
 
 
@@ -105,5 +131,4 @@ $.fn.endless = function(options) {
 
 $("body").endless({
 	sectionsInARow: 3,
-	axis: "x"
 });
