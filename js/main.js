@@ -63,7 +63,10 @@ $.fn.endless = function(options) {
     	drag.translatedX = matrix.m41;
     	drag.translatedY = matrix.m42;
 
-        markActive();
+        $(".endless-wrapper").on('transitionend webkitTransitionEnd oTransitionEnd otransitionend MSTransitionEnd', function(){
+            markActive();
+        });
+        
 
         activeItem.index = $(".active").index();
         activeItem.column = Math.abs(drag.translatedX/$("section").width());
@@ -88,8 +91,10 @@ $.fn.endless = function(options) {
     	//decide if continue scrolling:
     	if( activeItem.column>0.1 ){
             activeItem.column = Math.ceil(activeItem.column);
+            drag.toTranslateX = $("section").width()*activeItem.column
     	} else {
-    		
+    		activeItem.column = Math.floor(activeItem.column);
+            drag.toTranslateX = $("section").width()*activeItem.column
     	}
 
         finishSliding();
@@ -168,6 +173,7 @@ $.fn.endless = function(options) {
     			"-webkit-transform": "translate3d("+x+"px, "+y+"px, 0px)"
     		});
     	}
+        console.log(x)
 
     };
 
@@ -203,9 +209,7 @@ $.fn.endless = function(options) {
 
     //finish sliding to the desired slide (to stick to borders):
     function finishSliding() {
-        console.log("activeItem.column:"+activeItem.column)
-
-        doDrag($("section").width()*activeItem.column);
+        doDrag(-(drag.toTranslateX));
     };
 
 
