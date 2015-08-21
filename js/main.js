@@ -104,6 +104,8 @@ $.fn.endless = function(options) {
     		});
     	}
 
+        markActive();
+
     };
 
 
@@ -112,14 +114,24 @@ $.fn.endless = function(options) {
         var winH = $(window).height();
         var winW = $(window).width();
 
+        var mightBeActive = [];
+        var activeSlide;
+
         //find acctive slide x-coordinates:
-        for(var i=0; i<=$("section").length; i++){
-            if( $("section").eq(i).offset().left != 0 ) {
-                console.log("not $('section').eq("+i+")")
-            } else {
-                console.log("its $('section').eq("+i+")")
+        for(var i=0; i<$("section").length; i++){
+            if( $("section").eq(i).offset().left === 0 ) {
+                mightBeActive.push($("section").eq(i))
             }
         }
+        
+        for(var i=0; i<mightBeActive.length; i++){
+            if( mightBeActive[i].offset().top === 0 ) {
+                activeSlide = mightBeActive[i];
+            }
+        }
+
+        $("section").removeClass("active");
+        activeSlide.addClass("active");
     };
 
 
