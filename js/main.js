@@ -23,6 +23,13 @@ $.fn.endless = function(options) {
 
     //catch drag:
     var translated = window.getComputedStyle($('.endless-wrapper').get(0));
+
+    var activeItem = {
+        index: 0,
+        row: 0,
+        column: 0
+    };
+
     var drag = {
         startDrag: false,
         dragXStart: 0,
@@ -56,12 +63,36 @@ $.fn.endless = function(options) {
     	drag.translatedX = matrix.m41;
     	drag.translatedY = matrix.m42;
 
+        markActive();
+
+        activeItem.index = $(".active").index();
+        activeItem.column = Math.abs(drag.translatedX/$("section").width());
+        activeItem.row =  Math.abs(drag.translatedY/$("section").height());
+
+        if( drag.direction.left ){
+            //activeItem.column++;
+        }
+
+        if( drag.direction.right ){
+            //activeItem.column--;
+        }
+
+        if( drag.direction.up ){
+            //activeItem.row--;
+        }
+
+        if( drag.direction.down ){
+            //activeItem.row++;
+        }       
+
     	//decide if continue scrolling:
-    	if( Math.abs(drag.dragXStart-e.pageX)/($("section").width()/100)>5 ){
-            //calculate missing distanse to scroll:
+    	if( activeItem.column>0.1 ){
+            activeItem.column = Math.ceil(activeItem.column);
     	} else {
     		
     	}
+
+        finishSliding();
     	
     });
 
@@ -138,8 +169,6 @@ $.fn.endless = function(options) {
     		});
     	}
 
-        markActive();
-
     };
 
 
@@ -174,7 +203,9 @@ $.fn.endless = function(options) {
 
     //finish sliding to the desired slide (to stick to borders):
     function finishSliding() {
+        console.log("activeItem.column:"+activeItem.column)
 
+        doDrag($("section").width()*activeItem.column);
     };
 
 
@@ -182,5 +213,5 @@ $.fn.endless = function(options) {
 
 $("body").endless({
 	sectionsInARow: 3,
-    //axis: "x"
+    axis: "x"
 });

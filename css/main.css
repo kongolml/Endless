@@ -22,12 +22,16 @@ section.active {
 	display: table;
 }
 
+.endless-wrapper {
+	position: absolute;
+	transition: 400ms;
+	-webkit-transition: 400ms;
+}
+
 .endless-wrapper.dragging {
 	cursor: -moz-grabbing;
     cursor: -webkit-grabbing;
     cursor: grabbing;
-}
-
-.endless-wrapper {
-	position: absolute;
+	transition: 0ms;
+	-webkit-transition: 0ms;
 }
