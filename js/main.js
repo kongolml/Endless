@@ -20,35 +20,44 @@ $.fn.endless = function(options) {
     $("section").wrapAll('<div class="endless-wrapper"></div>');
 
 
-    //catch drag:
-    var startDrag = false;
-    var dragXStart, dragYStart;
-    var translated = window.getComputedStyle($('.endless-wrapper').get(0));
-    var translatedX = 0;
-    var translatedY = 0;
 
-    var toTranslateX = 0;
-    var toTranslateY = 0;
+    //catch drag:
+    var translated = window.getComputedStyle($('.endless-wrapper').get(0));
+    var drag = {
+        startDrag: false,
+        dragXStart: 0,
+        dragYStart: 0,
+        translatedX: 0,
+        translatedY: 0,
+        toTranslateX: 0,
+        toTranslateY: 0,
+        direction: {
+            left: false,
+            right: false,
+            up: false,
+            down: false
+        }
+    };
 
     $("body").mousedown(function(e){
     	//start dragging only with left mouse button:
     	if(e.which === 1){
-    		startDrag = true;
-	    	dragXStart = e.pageX;
-	    	dragYStart = e.pageY;
+    		drag.startDrag = true;
+	    	drag.dragXStart = e.pageX;
+	    	drag.dragYStart = e.pageY;
 	    	$(".endless-wrapper").addClass("dragging");
 	    }
     });
 
     $("body").mouseup(function(e){
-    	startDrag = false;
+    	drag.startDrag = false;
     	$(".endless-wrapper").removeClass("dragging");
 		var matrix = new WebKitCSSMatrix(translated.webkitTransform);
-    	translatedX = matrix.m41;
-    	translatedY = matrix.m42;
+    	drag.translatedX = matrix.m41;
+    	drag.translatedY = matrix.m42;
 
     	//decide if continue scrolling:
-    	if( Math.abs(dragXStart-e.pageX)/($("section").width()/100)>5 ){
+    	if( Math.abs(drag.dragXStart-e.pageX)/($("section").width()/100)>5 ){
             //calculate missing distanse to scroll:
     	} else {
     		
@@ -57,14 +66,39 @@ $.fn.endless = function(options) {
     });
 
     $("body").mousemove(function(e){
-    	if(startDrag) {
-    		toTranslateX = e.pageX - dragXStart + translatedX;
-    		toTranslateY = e.pageY - dragYStart + translatedY;
-    		drag(toTranslateX, toTranslateY);
+    	if(drag.startDrag) {
+    		drag.toTranslateX = e.pageX - drag.dragXStart + drag.translatedX;
+    		drag.toTranslateY = e.pageY - drag.dragYStart + drag.translatedY;
+    		doDrag(drag.toTranslateX, drag.toTranslateY);
+
+            //direction of drag:
+            var xVal = drag.dragXStart-e.pageX;
+            var yVal = drag.dragYStart-e.pageY;
+            if( xVal<0 ){
+                drag.direction.left=false;
+                drag.direction.right=true;
+            } else if( xVal>0 ) {
+                drag.direction.left=true;
+                drag.direction.right=false;
+            } else {
+                drag.direction.left=false;
+                drag.direction.right=false;
+            }
+
+            if( yVal<0 ){
+                drag.direction.up=false;
+                drag.direction.down=true;
+            } else if( yVal>0 ) {
+                drag.direction.up=true;
+                drag.direction.down=false;
+            } else {
+                drag.direction.up=false;
+                drag.direction.down=false;
+            }
     	}
     });
 
-    function drag(x, y){
+    function doDrag(x, y){
     	//check if dragging is within the container:
     	if(x>0){
     		x=0
@@ -109,7 +143,7 @@ $.fn.endless = function(options) {
     };
 
 
-    //TODO: get active slide:
+    //Get active slide:
     function markActive(){
         var winH = $(window).height();
         var winW = $(window).width();
@@ -117,13 +151,14 @@ $.fn.endless = function(options) {
         var mightBeActive = [];
         var activeSlide;
 
-        //find acctive slide x-coordinates:
+        //find active slide x-coordinates:
         for(var i=0; i<$("section").length; i++){
             if( $("section").eq(i).offset().left === 0 ) {
                 mightBeActive.push($("section").eq(i))
             }
         }
         
+        //from potentially active slides find the one that really active:
         for(var i=0; i<mightBeActive.length; i++){
             if( mightBeActive[i].offset().top === 0 ) {
                 activeSlide = mightBeActive[i];
@@ -131,16 +166,21 @@ $.fn.endless = function(options) {
         }
 
         $("section").removeClass("active");
-        activeSlide.addClass("active");
+        if( activeSlide != null ){
+            activeSlide.addClass("active"); 
+        }
     };
 
 
+    //finish sliding to the desired slide (to stick to borders):
+    function finishSliding() {
 
-
+    };
 
 
 };
 
 $("body").endless({
 	sectionsInARow: 3,
+    //axis: "x"
 });
