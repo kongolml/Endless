@@ -8,7 +8,8 @@ $.fn.endless = function(options) {
     var settings = $.extend({
         sectionsInARow: 1,
         axis: 'both',
-        transition: 400
+        transition: 400,
+        finishSliding: true
     }, options );
 
 
@@ -38,6 +39,8 @@ $.fn.endless = function(options) {
         translatedY: 0,
         toTranslateX: 0,
         toTranslateY: 0,
+        draggedDistanceX: 0,
+        draggedDistanceY: 0,
         direction: {
             left: false,
             right: false,
@@ -61,45 +64,20 @@ $.fn.endless = function(options) {
     	$(".endless-wrapper").removeClass("dragging");
 		var matrix = new WebKitCSSMatrix(translated.webkitTransform);
     	drag.translatedX = matrix.m41;
-    	drag.translatedY = matrix.m42;
+    	drag.translatedY = matrix.m42;        
+
+        activeItem.index = $(".active").index();
+        activeItem.column = Math.abs(drag.translatedX/$("section").width());
+        activeItem.row =  Math.abs(drag.translatedY/$("section").height());          
 
         $(".endless-wrapper").on('transitionend webkitTransitionEnd oTransitionEnd otransitionend MSTransitionEnd', function(){
             markActive();
         });
-        
-
-        activeItem.index = $(".active").index();
-        activeItem.column = Math.abs(drag.translatedX/$("section").width());
-        activeItem.row =  Math.abs(drag.translatedY/$("section").height());
-
-        if( drag.direction.left ){
-            //activeItem.column++;
-        }
-
-        if( drag.direction.right ){
-            //activeItem.column--;
-        }
-
-        if( drag.direction.up ){
-            //activeItem.row--;
-        }
-
-        if( drag.direction.down ){
-            //activeItem.row++;
-        }       
-
-    	//decide if continue scrolling:
-    	if( activeItem.column>0.1 ){
-            activeItem.column = Math.ceil(activeItem.column);
-            drag.toTranslateX = $("section").width()*activeItem.column
-    	} else {
-    		activeItem.column = Math.floor(activeItem.column);
-            drag.toTranslateX = $("section").width()*activeItem.column
-    	}
 
         finishSliding();
     	
     });
+
 
     $("body").mousemove(function(e){
     	if(drag.startDrag) {
@@ -132,6 +110,9 @@ $.fn.endless = function(options) {
                 drag.direction.down=false;
             }
     	}
+
+        drag.draggedDistanceX = Math.abs(drag.dragXStart-e.pageX);
+        drag.draggedDistanceY = Math.abs(drag.dragYStart-e.pageY);
     });
 
     function doDrag(x, y){
@@ -173,7 +154,6 @@ $.fn.endless = function(options) {
     			"-webkit-transform": "translate3d("+x+"px, "+y+"px, 0px)"
     		});
     	}
-        console.log(x)
 
     };
 
@@ -207,9 +187,40 @@ $.fn.endless = function(options) {
     };
 
 
+
     //finish sliding to the desired slide (to stick to borders):
-    function finishSliding() {
-        doDrag(-(drag.toTranslateX));
+    function finishSliding(){
+        //decide if continue scrolling:
+        if( drag.draggedDistanceX*100/$("section").width()>5 && drag.direction.left ){
+            activeItem.column = Math.ceil(activeItem.column);
+        } else if( drag.draggedDistanceX*100/$("section").width()>5 && drag.direction.right ) {
+            activeItem.column = Math.floor(activeItem.column);
+        } else {
+            activeItem.column = Math.floor(activeItem.column);
+        }
+
+        drag.toTranslateX = $("section").width()*activeItem.column;
+
+
+        if( drag.direction.left ){
+            doDrag(-(drag.toTranslateX));
+            drag.translatedX = -drag.toTranslateX;
+        }
+
+        if( drag.direction.right ){
+            doDrag(-(drag.toTranslateX));
+            drag.translatedX = -drag.toTranslateX;
+        }
+
+        if( drag.direction.up ){
+ 
+        }
+
+        if( drag.direction.down ){
+
+        }  
+
+        console.log(drag.toTranslateX)
     };
 
 
@@ -217,5 +228,6 @@ $.fn.endless = function(options) {
 
 $("body").endless({
 	sectionsInARow: 3,
-    axis: "x"
+    axis: "x",
+    finishSliding: true
 });
