@@ -199,28 +199,27 @@ $.fn.endless = function(options) {
             activeItem.column = Math.floor(activeItem.column);
         }
 
+        if( drag.draggedDistanceY*100/$("section").height()>5 && drag.direction.up ){
+            activeItem.row = Math.ceil(activeItem.row);
+        } else if( drag.draggedDistanceY*100/$("section").height()>5 && drag.direction.down ) {
+            activeItem.row = Math.floor(activeItem.row);
+        } else {
+            activeItem.row = Math.floor(activeItem.row);
+        }
+
         drag.toTranslateX = $("section").width()*activeItem.column;
+        drag.toTranslateY = $("section").height()*activeItem.row;
 
 
-        if( drag.direction.left ){
-            doDrag(-(drag.toTranslateX));
+        if( drag.direction.left || drag.direction.right ){
+            doDrag(-(drag.toTranslateX), -(drag.toTranslateY));
             drag.translatedX = -drag.toTranslateX;
         }
 
-        if( drag.direction.right ){
-            doDrag(-(drag.toTranslateX));
-            drag.translatedX = -drag.toTranslateX;
+        if( drag.direction.up || drag.direction.down ){
+            doDrag(-(drag.toTranslateX), -(drag.toTranslateY));
+            drag.translatedY = -drag.toTranslateY;
         }
-
-        if( drag.direction.up ){
- 
-        }
-
-        if( drag.direction.down ){
-
-        }  
-
-        console.log(drag.toTranslateX)
     };
 
 
@@ -228,6 +227,6 @@ $.fn.endless = function(options) {
 
 $("body").endless({
 	sectionsInARow: 3,
-    axis: "x",
+    //axis: "y",
     finishSliding: true
 });
