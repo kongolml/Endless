@@ -8,8 +8,9 @@ $.fn.endless = function(options) {
     var settings = $.extend({
         sectionsInARow: 1,
         axis: 'both',
-        transition: 400,
-        finishSliding: true
+        speed: 400,
+        finishSliding: true,
+        keyboardNav: false
     }, options );
 
 
@@ -46,7 +47,8 @@ $.fn.endless = function(options) {
             right: false,
             up: false,
             down: false
-        }
+        },
+        triggeredByKeyboard: false
     };
 
     $("body").mousedown(function(e){
@@ -61,21 +63,7 @@ $.fn.endless = function(options) {
 
     $("body").mouseup(function(e){
     	drag.startDrag = false;
-    	$(".endless-wrapper").removeClass("dragging");
-		var matrix = new WebKitCSSMatrix(translated.webkitTransform);
-    	drag.translatedX = matrix.m41;
-    	drag.translatedY = matrix.m42;        
-
-        activeItem.index = $(".active").index();
-        activeItem.column = Math.abs(drag.translatedX/$("section").width());
-        activeItem.row =  Math.abs(drag.translatedY/$("section").height());          
-
-        $(".endless-wrapper").on('transitionend webkitTransitionEnd oTransitionEnd otransitionend MSTransitionEnd', function(){
-            markActive();
-        });
-
-        finishSliding();
-    	
+    	finishDrag();
     });
 
 
@@ -114,6 +102,58 @@ $.fn.endless = function(options) {
         drag.draggedDistanceX = Math.abs(drag.dragXStart-e.pageX);
         drag.draggedDistanceY = Math.abs(drag.dragYStart-e.pageY);
     });
+
+
+    $("body").keyup(function(e){
+        switch(e.which){
+            case 38:
+                //up key:
+                drag.direction.left=false;
+                drag.direction.right=false;
+                drag.direction.up=false;
+                drag.direction.down=true;
+                drag.triggeredByKeyboard = true;
+                finishDrag();
+                drag.triggeredByKeyboard = false;
+                break;
+
+            case 39:
+                //right key:
+                drag.direction.left=true;
+                drag.direction.right=false;
+                drag.direction.up=false;
+                drag.direction.down=false;
+                drag.triggeredByKeyboard = true;
+                finishDrag();
+                drag.triggeredByKeyboard = false;
+                break;
+
+            case 40:
+                //down key:
+                drag.direction.left=false;
+                drag.direction.right=false;
+                drag.direction.up=true;
+                drag.direction.down=false;
+                drag.triggeredByKeyboard = true;
+                finishDrag();
+                drag.triggeredByKeyboard = false;
+                break;
+
+            case 37:
+                //left key:
+                drag.direction.left=false;
+                drag.direction.right=true;
+                drag.direction.up=false;
+                drag.direction.down=false;
+                drag.triggeredByKeyboard = true;
+                finishDrag();
+                drag.triggeredByKeyboard = false;
+                break;
+        }
+    });
+
+
+
 
     function doDrag(x, y){
     	//check if dragging is within the container:
@@ -158,6 +198,7 @@ $.fn.endless = function(options) {
     };
 
 
+
     //Get active slide:
     function markActive(){
         var winH = $(window).height();
@@ -187,6 +228,38 @@ $.fn.endless = function(options) {
     };
 
 
+    //perform stuff after mouse up and similar:
+    function finishDrag(){
+        $(".endless-wrapper").removeClass("dragging");
+        $(".endless-wrapper").css({
+            "transition": settings.speed+"ms",
+            "-webkit-transition": settings.speed+"ms"
+        });
+
+        var matrix = new WebKitCSSMatrix(translated.webkitTransform);
+        drag.translatedX = matrix.m41;
+        drag.translatedY = matrix.m42;        
+
+        activeItem.index = $(".active").index();
+        activeItem.column = Math.abs(drag.translatedX/$("section").width());
+        activeItem.row =  Math.abs(drag.translatedY/$("section").height());          
+
+
+        if( settings.finishSliding ){
+            finishSliding();
+            $(".endless-wrapper").on('transitionend webkitTransitionEnd oTransitionEnd otransitionend MSTransitionEnd', function(){
+                markActive();
+                $(".endless-wrapper").css({
+                    "transition": "0ms",
+                    "-webkit-transition": "0ms"
+                })
+            });
+        } else {
+            markActive();
+        }
+    }
+
+
 
     //finish sliding to the desired slide (to stick to borders):
     function finishSliding(){
@@ -195,17 +268,29 @@ $.fn.endless = function(options) {
             activeItem.column = Math.ceil(activeItem.column);
         } else if( drag.draggedDistanceX*100/$("section").width()>5 && drag.direction.right ) {
             activeItem.column = Math.floor(activeItem.column);
-        } else {
-            activeItem.column = Math.floor(activeItem.column);
         }
 
         if( drag.draggedDistanceY*100/$("section").height()>5 && drag.direction.up ){
             activeItem.row = Math.ceil(activeItem.row);
         } else if( drag.draggedDistanceY*100/$("section").height()>5 && drag.direction.down ) {
             activeItem.row = Math.floor(activeItem.row);
-        } else {
-            activeItem.row = Math.floor(activeItem.row);
         }
+
+
+        if( settings.keyboardNav && drag.triggeredByKeyboard ) {
+            if( drag.direction.left ){
+                activeItem.column++;
+            } else if( drag.direction.right ) {
+                activeItem.column--;
+            }
+
+            if( drag.direction.up ){
+                activeItem.row++;
+            } else if( drag.direction.down ) {
+                activeItem.row--;
+            }
+        }
+
 
         drag.toTranslateX = $("section").width()*activeItem.column;
         drag.toTranslateY = $("section").height()*activeItem.row;
@@ -227,6 +312,8 @@ $.fn.endless = function(options) {
 
 $("body").endless({
 	sectionsInARow: 3,
-    //axis: "y",
-    finishSliding: true
+    axis: "x",
+    finishSliding: true,
+    speed: 800,
+    keyboardNav: true
 });

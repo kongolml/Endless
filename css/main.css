@@ -24,8 +24,6 @@ section.active {
 
 .endless-wrapper {
 	position: absolute;
-	transition: 400ms;
-	-webkit-transition: 400ms;
 }
 
 .endless-wrapper.dragging {
